@@ -27,6 +27,7 @@ volatile u_int8_t dmxValue = 0;
 uint16_t width;
 volatile bool gedrueckt;
 volatile uint16_t encoderWert;
+volatile bool neueDatenZuSenden;
 
 // instead of changing here, rather change numbers above
 AiEsp32RotaryEncoder rotaryEncoder = AiEsp32RotaryEncoder(ROTARY_ENCODER_A_PIN, ROTARY_ENCODER_B_PIN, ROTARY_ENCODER_BUTTON_PIN, ROTARY_ENCODER_VCC_PIN, ROTARY_ENCODER_STEPS);
@@ -55,7 +56,7 @@ void senderMenueTask(void *parameter);
 void dmxTask(void *parameter);
 void automaticDMXTask(void* parameter);
 
-char *buffer = new char[256];
+uint8_t buffer[513];
 char *ptr;
 uint8_t i = 0;
 
@@ -111,34 +112,31 @@ void drawMainMenue(uint8_t selected)
   displaySprite.drawString("Hauptmenü", 5, 5);
   displaySprite.unloadFont();
   displaySprite.loadFont(LARGE_FONT_30);
-  if (selected > 2)
-  {
-    selected = 0;
-  }
+  
   switch (selected)
   {
   case 0:
   {
-    drawItem(20, 50, 4, 3, 280, 35, TFT_WHITE, TFT_RED, "DMX Senden");
+    drawItem(20, 50, 4, 3, 280, 35, TFT_WHITE, TFT_BLUE, "DMX Senden");
     drawItem(20, 95, 4, 3, 280, 35, TFT_WHITE, TFT_BLACK, "Auto Modus");
-    drawItem(20, 140, 4, 3, 280, 35, TFT_WHITE, TFT_BLACK, "Weiterer Punkt");
+    //drawItem(20, 140, 4, 3, 280, 35, TFT_WHITE, TFT_BLACK, "Weiterer Punkt");
 
     break;
   }
   case 1:
   {
     drawItem(20, 50, 4, 3, 280, 35, TFT_WHITE, TFT_BLACK, "DMX Senden");
-    drawItem(20, 95, 4, 3, 280, 35, TFT_WHITE, TFT_RED, "Auto Modus");
-    drawItem(20, 140, 4, 3, 280, 35, TFT_WHITE, TFT_BLACK, "Weiterer Punkt");
+    drawItem(20, 95, 4, 3, 280, 35, TFT_WHITE, TFT_BLUE, "Auto Modus");
+    //drawItem(20, 140, 4, 3, 280, 35, TFT_WHITE, TFT_BLACK, "Weiterer Punkt");
     break;
   }
-  case 2:
-  {
-    drawItem(20, 50, 4, 3, 280, 35, TFT_WHITE, TFT_BLACK, "DMX Senden");
-    drawItem(20, 95, 4, 3, 280, 35, TFT_WHITE, TFT_BLACK, "Auto Modus");
-    drawItem(20, 140, 4, 3, 280, 35, TFT_WHITE, TFT_RED, "Weiterer Punkt");
-    break;
-  }
+  //case 2:
+  //{
+    //drawItem(20, 50, 4, 3, 280, 35, TFT_WHITE, TFT_BLACK, "DMX Senden");
+    //drawItem(20, 95, 4, 3, 280, 35, TFT_WHITE, TFT_BLACK, "Auto Modus");
+    //drawItem(20, 140, 4, 3, 280, 35, TFT_WHITE, TFT_BLUE, "Weiterer Punkt");
+    //break;
+  //}
   }
 
   displaySprite.pushSprite(0, 0);
@@ -146,6 +144,10 @@ void drawMainMenue(uint8_t selected)
 
 void setup()
 {
+  for(uint16_t i = 0; i< 513; i++){
+    buffer[i] = 0;
+  }
+
   rotaryEncoder.begin();
   rotaryEncoder.setup(readEncoderISR);
 
@@ -174,6 +176,7 @@ void setup()
   mainScreen.setRotation(3);
   mainScreen.fillScreen(TFT_BLACK);
   mainScreen.setTextSize(1);
+  mainScreen.setSwapBytes(true);
 
   displaySprite.createSprite(320, 240);
   displaySprite.loadFont(LARGE_FONT_36);
@@ -203,7 +206,7 @@ void mainMenueTask(void *parameter)
 
   for (;;)
   {
-    rotaryEncoderFunction(3,false);
+    rotaryEncoderFunction(2,false);
 
     if (gedrueckt)
     {
@@ -259,12 +262,13 @@ void senderMenueTask(void *parameter)
     displaySprite.drawString("Zurück", 185, 210);
 
     rotaryEncoderFunction(4,false);
+    
 
     switch (encoderWert)
     {
     case 0:
     {
-      displaySprite.drawSmoothRoundRect(20, 70, 5, 3, 80, 40, TFT_RED);
+      displaySprite.drawSmoothRoundRect(20, 70, 5, 3, 80, 40, TFT_BLUE);
       displaySprite.pushSprite(0, 0);
       if (gedrueckt)
       {
@@ -272,7 +276,10 @@ void senderMenueTask(void *parameter)
         displaySprite.setCursor(35, 80);
         displaySprite.drawSmoothRoundRect(20, 70, 5, 3, 80, 40, TFT_ORANGE);
         displaySprite.pushSprite(0, 0);
-        encoderWert = 0;
+        rotaryEncoderFunction(256,true);
+        encoderWert = dmxValue;
+        rotaryEncoder.setEncoderValue(dmxValue);
+        
         do
         {
           vTaskDelay(pdMS_TO_TICKS(50));
@@ -284,13 +291,14 @@ void senderMenueTask(void *parameter)
           rotaryEncoderFunction(256,true);
         } while (!gedrueckt);
         encoderWert = 0;
+        rotaryEncoder.setEncoderValue(0);
       }
 
       break;
     }
     case 1:
     {
-      displaySprite.drawSmoothRoundRect(20, 145, 5, 3, 80, 40, TFT_RED);
+      displaySprite.drawSmoothRoundRect(20, 145, 5, 3, 80, 40, TFT_BLUE);
       displaySprite.pushSprite(0, 0);
       if (gedrueckt)
       {
@@ -298,7 +306,9 @@ void senderMenueTask(void *parameter)
         displaySprite.setCursor(35, 155);
         displaySprite.drawSmoothRoundRect(20, 145, 5, 3, 80, 40, TFT_ORANGE);
         displaySprite.pushSprite(0, 0);
-        encoderWert = 0;
+        rotaryEncoderFunction(512,true);
+        encoderWert = (dmxAdress-1);
+        rotaryEncoder.setEncoderValue((dmxAdress-1));
         do
         {
           vTaskDelay(pdMS_TO_TICKS(50));
@@ -310,33 +320,36 @@ void senderMenueTask(void *parameter)
           rotaryEncoderFunction(512,true);
         } while (!gedrueckt);
         encoderWert = 0;
+        rotaryEncoder.setEncoderValue(0);
       }
       break;
     }
     case 2:
     {
-      displaySprite.drawSmoothRoundRect(35, 203, 4, 2, 110, 35, TFT_RED);
+      displaySprite.drawSmoothRoundRect(35, 203, 4, 2, 110, 35, TFT_BLUE);
       displaySprite.pushSprite(0, 0);
       if(gedrueckt){
         //senden
-
-        xTaskNotify(dmxTaskHandle,0,eNoAction);
-
+        Serial.printf("DMX Value: %d, DMX Adresse: %d\n",dmxValue,dmxAdress);
+        neueDatenZuSenden = true;
+        encoderWert = 0;
+        rotaryEncoder.setEncoderValue(0);
         vTaskResume(mainMenueTaskHandle);
         vTaskSuspend(NULL);
-        encoderWert = 0;
+        
       }
       
       break;
     }
     case 3:
     {
-      displaySprite.drawSmoothRoundRect(175, 203, 4, 2, 110, 35, TFT_RED);
+      displaySprite.drawSmoothRoundRect(175, 203, 4, 2, 110, 35, TFT_BLUE);
       displaySprite.pushSprite(0, 0);
       if(gedrueckt){
+        encoderWert = 0;
+        rotaryEncoder.setEncoderValue(0);
         vTaskResume(mainMenueTaskHandle);
         vTaskSuspend(NULL);
-        encoderWert = 0;
       }
       
       break;
@@ -349,8 +362,12 @@ void senderMenueTask(void *parameter)
 void dmxTask(void* parameter){
   
   for(;;){
-    xTaskNotifyWait(ULONG_MAX,ULONG_MAX,0,portMAX_DELAY);
+    while(!neueDatenZuSenden){
+      vTaskDelay(pdMS_TO_TICKS(50));
+    }
+    neueDatenZuSenden = false;
     dmx_wait_sent(dmx_num,portMAX_DELAY);
+    dmx_write(dmx_num,buffer,DMX_PACKET_SIZE);
     dmx_write_slot(dmx_num,0,0x00);
     dmx_write_slot(dmx_num,dmxAdress,dmxValue);
     dmx_send(dmx_num,DMX_PACKET_SIZE);
