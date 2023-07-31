@@ -138,7 +138,7 @@ void wifiTask(void *parameter)
 }
 void onConnect()
 {
-
+  response = "";
   response += "<!DOCTYPE html> <html>\n";
   response += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
   response += "<title>DMX</title>\n";
@@ -148,7 +148,7 @@ void onConnect()
 
   if (data_size > 0)
   {
-    response += "<ol>\n";
+    response += "<ol start = \"0\">\n";
     for (uint16_t i = 0; i < DMX_PACKET_SIZE; i++)
     {
       response += "<li>";
