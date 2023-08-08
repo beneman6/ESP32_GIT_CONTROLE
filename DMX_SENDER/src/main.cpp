@@ -64,6 +64,13 @@ uint8_t buffer[513];
 char *ptr;
 uint8_t i = 0;
 
+void resetTabelle(){
+
+  for(uint16_t i = 0; i < sizeof(tabelle); i++){
+    tabelle[i] = 0;
+  }
+}
+
 void IRAM_ATTR readEncoderISR()
 {
   rotaryEncoder.readEncoder_ISR();
@@ -232,6 +239,7 @@ void mainMenueTask(void *parameter)
       }
       case 2:
       {
+        resetTabelle();
         vTaskResume(multipleSenderMenueTaskHandle);
         vTaskSuspend(NULL);
         break;
