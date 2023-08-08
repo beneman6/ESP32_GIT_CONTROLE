@@ -1,0 +1,11 @@
+./DMX_RECEIVER/.pio
+./DMX_RECEIVER/.vscode/.browse.c_cpp.db*
+./DMX_RECEIVER/.vscode/c_cpp_properties.json
+./DMX_RECEIVER/.vscode/launch.json
+./DMX_RECEIVER/.vscode/ipch
+
+./DMX_SENDER/.pio
+./DMX_SENDER/.vscode/.browse.c_cpp.db*
+./DMX_SENDER/.vscode/c_cpp_properties.json
+./DMX_SENDER/.vscode/launch.json
+./DMX_SENDER/.vscode/ipch

@@ -12,9 +12,9 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "c:/Users/benzc/Documents/PlatformIO/Projects/ESP32_DMX_CONTROLE/DMX_RECEIVER/.pio/build/esp32dev/firmware.elf",
+            "executable": "C:/Users/benzc/OneDrive/Dokumente/PlatformIO/Projects/ESP32_DMX_CONTROLE/DMX_RECEIVER/.pio/build/esp32dev/firmware.elf",
             "projectEnvName": "esp32dev",
-            "toolchainBinDir": "C:/Users/benzc/.platformio/packages/toolchain-xtensa-esp32/bin",
+            "toolchainBinDir": "C:/Users/benzc/.platformio/packages/toolchain-xtensa-esp32@8.4.0+2021r2-patch5/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": {
                 "type": "PlatformIO",
@@ -25,18 +25,18 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "c:/Users/benzc/Documents/PlatformIO/Projects/ESP32_DMX_CONTROLE/DMX_RECEIVER/.pio/build/esp32dev/firmware.elf",
+            "executable": "C:/Users/benzc/OneDrive/Dokumente/PlatformIO/Projects/ESP32_DMX_CONTROLE/DMX_RECEIVER/.pio/build/esp32dev/firmware.elf",
             "projectEnvName": "esp32dev",
-            "toolchainBinDir": "C:/Users/benzc/.platformio/packages/toolchain-xtensa-esp32/bin",
+            "toolchainBinDir": "C:/Users/benzc/.platformio/packages/toolchain-xtensa-esp32@8.4.0+2021r2-patch5/bin",
             "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
-            "executable": "c:/Users/benzc/Documents/PlatformIO/Projects/ESP32_DMX_CONTROLE/DMX_RECEIVER/.pio/build/esp32dev/firmware.elf",
+            "executable": "C:/Users/benzc/OneDrive/Dokumente/PlatformIO/Projects/ESP32_DMX_CONTROLE/DMX_RECEIVER/.pio/build/esp32dev/firmware.elf",
             "projectEnvName": "esp32dev",
-            "toolchainBinDir": "C:/Users/benzc/.platformio/packages/toolchain-xtensa-esp32/bin",
+            "toolchainBinDir": "C:/Users/benzc/.platformio/packages/toolchain-xtensa-esp32@8.4.0+2021r2-patch5/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "loadMode": "manual"
         }
