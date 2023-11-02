@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "DMX_SENDER",
+			"path": "."
+		},
+		{
+			"name": "DMX_RECEIVER",
+			"path": "../DMX_RECEIVER"
+		}
+	],
+	"settings": {}
+}

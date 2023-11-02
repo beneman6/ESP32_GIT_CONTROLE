@@ -6,8 +6,8 @@
 #include <Gotham-Medium30.h>
 #include <Gotham-Light26.h>
 
-#define DMX_TX_PIN 26
-#define DIGITAL_MICOPHONE_PIN 17
+#define DMX_TX_PIN 32
+#define DIGITAL_MICOPHONE_PIN 26
 #define BACKGROUND_COLOR 0x31A6
 #define LARGE_FONT_36 GothamMedium36
 #define LARGE_FONT_30 GothamMedium30
@@ -161,7 +161,6 @@ void drawMainMenue(uint8_t selected)
 void setup()
 {
 
-  pinMode(DIGITAL_MICOPHONE_PIN, INPUT);
   Serial.begin(115200);
   Serial.printf("Serial Receiver Initialized\n");
   for (uint16_t i = 0; i < 513; i++)
@@ -187,10 +186,9 @@ void setup()
   dmx_set_pin(dmx_num, DMX_TX_PIN, DMX_PIN_NO_CHANGE, DMX_PIN_NO_CHANGE);
 
   // ...use the default DMX configuration...
-  dmx_config_t config = DMX_CONFIG_DEFAULT;
 
   // ...and then install the driver!
-  Serial.printf("Hat es geklappt: %d\n", dmx_driver_install(dmx_num, &config, DMX_INTR_FLAGS_DEFAULT));
+  Serial.printf("Hat es geklappt: %d\n", dmx_driver_install(dmx_num, DMX_DEFAULT_INTR_FLAGS));
   // put your setup code here, to run once:
 
   mainScreen.begin();
@@ -201,17 +199,11 @@ void setup()
 
   displaySprite.createSprite(320, 240);
   displaySprite.loadFont(LARGE_FONT_36);
-
   width = displaySprite.textWidth("DMX Controller");
   uint8_t pos = (320 - width) / 2;
   displaySprite.drawString("DMX Controller", pos, 100);
   displaySprite.pushSprite(0, 0);
-
-  delay(pdMS_TO_TICKS(4000));
-
-  dmx_write_slot(dmx_num, 0, 0x00);
-  dmx_write_slot(dmx_num, 1, 255);
-  dmx_send(dmx_num, DMX_PACKET_SIZE);
+  pinMode(DIGITAL_MICOPHONE_PIN, INPUT);
 
   delay(pdMS_TO_TICKS(4000));
 
@@ -428,35 +420,28 @@ void automaticDMXTask(void *parameter)
     displaySprite.drawString("Auto Modus", 4, 4);
     displaySprite.unloadFont();
     displaySprite.loadFont(MEDIUM_FONT_26);
-    displaySprite.drawSmoothRoundRect(175, 203, 4, 2, 110, 35, TFT_WHITE);
+    displaySprite.drawSmoothRoundRect(175, 203, 4, 2, 110, 35, TFT_BLUE);
     displaySprite.drawString("Zurück", 185, 210);
     displaySprite.unloadFont();
+    displaySprite.pushSprite(0, 0);
     rotaryEncoderFunction(1, false);
-    if (gedrueckt)
-    {
-      vTaskResume(mainMenueTaskHandle);
-      vTaskSuspend(NULL);
-    }
-    if (digitalRead(DIGITAL_MICOPHONE_PIN) == HIGH)
+    while (!gedrueckt)
     {
 
-      static unsigned long lastTimeActivated = 0; // Soft debouncing
-      if (!(millis() - lastTimeActivated < 100))
+      if (digitalRead(DIGITAL_MICOPHONE_PIN) == HIGH)
       {
-        
-        
-        dmx_write_slot(dmx_num, 0, 0x00);
-        dmx_write_slot(dmx_num, 1, 255);
-      }
-      else{
-        
-        
-        dmx_write_slot(dmx_num, 0, 0x00);
-        dmx_write_slot(dmx_num, 1, 0);
-      }
-    }
 
-    vTaskDelay(pdMS_TO_TICKS(50));
+        tabelle[0] = 255;
+        neueDatenZuSenden = true;
+        vTaskDelay(pdMS_TO_TICKS(30));
+        
+      }
+      vTaskDelay(pdMS_TO_TICKS(5));
+      rotaryEncoderFunction(1,false);
+    }
+    
+    vTaskResume(mainMenueTaskHandle);
+    vTaskSuspend(NULL);
   }
 }
 void multipleSenderMenueTask(void *parameter)
@@ -531,7 +516,7 @@ void multipleSenderMenueTask(void *parameter)
         do
         {
           vTaskDelay(pdMS_TO_TICKS(50));
-          tabelle[kanal] = encoderWert;
+          kanal = encoderWert;
           displaySprite.fillRect(38, 150, 50, 30, BACKGROUND_COLOR);
           displaySprite.setCursor(35, 155);
           displaySprite.printf("%3d", (kanal + 1));
@@ -551,6 +536,9 @@ void multipleSenderMenueTask(void *parameter)
       {
         // senden
         Serial.printf("DMX Value: %d, DMX Adresse: %d\n", dmxValue, dmxAdress);
+        einenWertSenden = false;
+        neueDatenZuSenden = true;
+
         encoderWert = 0;
         rotaryEncoder.setEncoderValue(0);
         vTaskResume(mainMenueTaskHandle);
